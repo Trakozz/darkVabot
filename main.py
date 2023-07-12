@@ -1,33 +1,30 @@
-import discord
-from discord.ext import commands
+import asyncio
 
 import LoadData
-import event_handlers
+from darthVabot import Bot
+import logging
 
 
-def set_intents():
-    intents = discord.Intents.default()
-    intents.typing = False
-    intents.message_content = True
-    return intents
+async def main():
+    # Configure logging
+    logging.basicConfig(level=logging.DEBUG)
+    logging.getLogger('discord').setLevel(logging.DEBUG)
 
+    bot = Bot()
+    try:
+        await bot.load_extension('commands.utils.utils')
+        await bot.load_extension('commands.vador')
+        await bot.load_extension('commands.moderation.moderation')
+        print('Cogs loaded successfully')
+    except Exception as e:
+        print(f'Failed to load cogs: {e}')
+    try:
+        await bot.start(LoadData.data['token'])
+    except KeyboardInterrupt:
+        await bot.close()
 
-darth_vabot = commands.Bot(command_prefix=LoadData.data['prefix'], intents=set_intents())
-
-
-def run_bot():
-    bot_instance = darth_vabot
-    bot_instance.run(LoadData.data['token'])
-
-
-run_bot()
-
-# async def on_message(message):
-#     print(message.author)
-#     print(darthVabot.user)
-#     if message.author == darthVabot.user:
-#         return
-#
-#     if message.content.startswith('!hello'):
-#         print('on_message')
-#         await parseCommand.BaseCommand.quote(message.channel)
+if __name__ == '__main__':
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Bot stopped manually.")
